@@ -7,7 +7,12 @@ Research: Mathematical Foundations and Attack Analysis*, Term 2 2026).
 This repository is the **project output** for that report — the report itself only
 summarises the results and links here. This README is the quick overview; for the full
 step-by-step walkthrough (background, mechanism, why each script is structured the way it
-is, and a line-by-line reading of its actual output) see **[OUTPUT.md](OUTPUT.md)**.
+is, and a line-by-line reading of its actual output) see **[OUTPUT.md](OUTPUT.md)**. For the
+process story behind the whole project — how the topic was picked, what went wrong along the
+way, and how the submission format ended up the way it did — see **[JOURNEY.md](JOURNEY.md)**.
+For a structured breakdown of the 30-hour time budget, specific challenges and how each was
+resolved, and what I'd do differently given another 30 hours, see
+**[TIME_AND_CHALLENGES.md](TIME_AND_CHALLENGES.md)**.
 
 Each script follows the same pattern: reproduce the report's own worked example (where one
 exists), run a larger/more realistic case, and run a control case that is **expected to
@@ -20,6 +25,8 @@ attack, rather than being hard-coded to succeed.
 .
 ├── README.md                    You are here — quick overview
 ├── OUTPUT.md                    Full step-by-step walkthrough (background, mechanism, output line-by-line)
+├── JOURNEY.md                   The process story — how the project and report actually came together
+├── TIME_AND_CHALLENGES.md       30-hour time breakdown, specific challenges + resolutions, what I'd improve
 ├── wieners_attack.py            Wiener's Attack
 ├── common_modulus_attack.py     Common Modulus Attack
 ├── bleichenbacher_toy.py        Bleichenbacher's Padding Oracle Attack (toy simulation)
