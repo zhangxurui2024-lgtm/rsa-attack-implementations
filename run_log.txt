@@ -1,0 +1,94 @@
+======================================================================
+ RSA Project Output -- Combined Run Log
+ Generated: 2026-07-11 08:21 UTC
+======================================================================
+
+############################  wieners_attack.py  ############################
+Wiener bound N^(1/4)/3 for N=667: 1.694  (d=5 exceeds this)
+--- Original Appendix A numbers (d=5) -- expected to FAIL, bound violated ---
+N = 667
+e = 493
+[FAILED] Attack did not recover a valid private key (expected when d is not sufficiently small).
+
+Wiener bound N^(1/4)/3 for N=1022117: 10.599  (d=5 satisfies this)
+--- Corrected small worked example (d=5, bound satisfied) ---
+N = 1022117
+e = 816077
+[SUCCESS] Recovered d = 5
+[SUCCESS] Recovered factors: p = 1013, q = 1009
+Verified against expected d = 5: MATCH
+
+--- Realistic modulus, vulnerable small d  (Wiener bound ~ 1176064203) ---
+N = 154956266351578708881143727033773075869
+e = 83617345179238645257514665346417648727
+[SUCCESS] Recovered d = 234067
+[SUCCESS] Recovered factors: p = 13740829428926665343, q = 11277067891212646883
+Verified against expected d = 234067: MATCH
+
+--- Safe key with large d (defence demonstration) ---
+N = 184130775649118757275375350042309929181
+e = 162518605602964828411581889179104912495
+[FAILED] Attack did not recover a valid private key (expected when d is not sufficiently small).
+
+
+########################  common_modulus_attack.py  ##########################
+--- Appendix B worked example (toy, N=667) ---
+N = 667
+e1 = 5, e2 = 7, gcd(e1, e2) = 1
+c1 = 586
+c2 = 521
+[SUCCESS] Recovered plaintext m = 42 (matches true m = 42)
+
+--- Realistic modulus, coprime exponents ---
+N = 166949190839218310680696301239290015941
+e1 = 17, e2 = 65537, gcd(e1, e2) = 1
+c1 = 60110392907398522938618787690860221143
+c2 = 151000080786313694843885281641800569871
+[SUCCESS] Recovered plaintext m = 16015396947517678802451456316263837493 (matches true m = 16015396947517678802451456316263837493)
+
+--- Control case: non-coprime exponents (attack should fail) ---
+N = 166949190839218310680696301239290015941
+e1 = 6, e2 = 10, gcd(e1, e2) = 2
+c1 = 115642372717922647374173239233230104797
+c2 = 20570817488245236760647013113972727371
+[FAILED] Attack precondition not met (gcd(e1, e2) != 1); as expected, the plaintext cannot be recovered this way.
+
+
+##########################  bleichenbacher_toy.py  ###########################
+Generating toy RSA keypair (small, for demo speed only)...
+N bit length = 127, k (bytes) = 16
+
+True secret message: b'HI'
+Encrypting with PKCS#1 v1.5 padding, then attacking using ONLY the padding-oracle signal (no private key used by the attacker)...
+
+[RESULT] Oracle queried 49640 times over 98 steps
+[RESULT] Recovered message: b'HI'
+[SUCCESS] Recovered message matches the true secret message.
+
+Note: against a real 2048-bit key this attack requires on the
+order of hundreds of thousands to millions of oracle queries; the
+toy modulus here is used purely to keep the demo runtime short
+while preserving the exact mathematical structure of the attack.
+
+##########################  timing_attack_demo.py  ###########################
+d1 = 733  (binary: 1011011101, 10 bits, 7 one-bits)
+d2 = 611  (binary: 1001100011, 10 bits, 5 one-bits)
+
+=== Naive square-and-multiply: operation count vs number of 1-bits ===
+naive_modexp with d1: 17 multiplications (expected len+weight = 17)
+naive_modexp with d2: 15 multiplications (expected len+weight = 15)
+-> Operation count (and hence real execution time) DIFFERS between d1 and d2, correlated with hamming weight.
+
+=== Constant-time (Montgomery-ladder style) implementation ===
+constant_time_modexp with d1: 20 multiplications (expected 2*len = 20)
+constant_time_modexp with d2: 20 multiplications (expected 2*len = 20)
+-> Operation count depends ONLY on bit length, never on which bits are 1: the timing side-channel is eliminated.
+
+=== Determinism check across many random messages (naive impl) ===
+Naive op-count is a function of d alone (never the message), which
+is exactly why an attacker who can measure many decryptions of
+different messages can isolate the signal caused by d's bits from
+measurement noise:
+
+d1: distinct op-counts across 50 random messages = {17} (always the same value -> pure function of d)
+d2: distinct op-counts across 50 random messages = {15} (always the same value -> pure function of d)
