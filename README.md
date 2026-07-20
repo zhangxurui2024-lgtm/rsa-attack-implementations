@@ -1,83 +1,80 @@
 # RSA Attack Implementations
 
-Runnable Python implementations of four classical RSA attacks, written as independent
-verification evidence for a COMP6441 Security Engineering project report (*RSA Cryptography
-Research: Mathematical Foundations and Attack Analysis*, Term 2 2026).
+COMP6441 Security Engineering — Project Repository  
+Student: Xurui Zhang (z5530809)  
+Tutor: Jason Phua  
+Submission: 25 July 2026
 
-This repository is the **project output** for that report — the report itself only
-summarises the results and links here. This README is the quick overview; for the full
-step-by-step walkthrough (background, mechanism, why each script is structured the way it
-is, and a line-by-line reading of its actual output) see **[OUTPUT.md](OUTPUT.md)**. For the
-process story behind the whole project — how the topic was picked, what went wrong along the
-way, and how the submission format ended up the way it did — see **[JOURNEY.md](JOURNEY.md)**.
-For a structured breakdown of the 30-hour time budget, specific challenges and how each was
-resolved, and what I'd do differently given another 30 hours, see
-**[TIME_AND_CHALLENGES.md](TIME_AND_CHALLENGES.md)**.
+---
 
-Each script follows the same pattern: reproduce the report's own worked example (where one
-exists), run a larger/more realistic case, and run a control case that is **expected to
-fail** — so the code demonstrates it encodes the real mathematical precondition of each
-attack, rather than being hard-coded to succeed.
+## What This Repository Contains
 
-## Contents
+This repository accompanies the project report *RSA Cryptography Research: Mathematical Foundations and Attack Analysis*. It contains:
 
-```
-.
-├── README.md                    You are here — quick overview
-├── OUTPUT.md                    Full step-by-step walkthrough (background, mechanism, output line-by-line)
-├── JOURNEY.md                   The process story — how the project and report actually came together
-├── TIME_AND_CHALLENGES.md       30-hour time breakdown, specific challenges + resolutions, what I'd improve
-├── wieners_attack.py            Wiener's Attack
-├── common_modulus_attack.py     Common Modulus Attack
-├── bleichenbacher_toy.py        Bleichenbacher's Padding Oracle Attack (toy simulation)
-├── timing_attack_demo.py        Timing Side-Channel Attack (simulation)
-├── run_log.txt                  Full captured output from one run of all four scripts
-├── requirements.txt
-└── images/                      Flowcharts referenced in OUTPUT.md
-```
+- Python implementations of four RSA attacks verified against test cases
+- Debugging notes documenting errors found (including two errors in the report's own appendices)
+- Work log with weekly time distribution (~32 hours total)
+- Project goals vs outcomes tracking
+- Ethics and professional considerations
 
-## Quick start
+The report PDF is submitted separately via Moodle as `Report-z5530809.pdf`.
+
+---
+
+## Attack Implementations
+
+| File | Attack | Status |
+|------|--------|--------|
+| `wiener_attack.py` | Wiener's Attack on small private exponents | ✅ Working — 4 test cases including real-scale |
+| `common_modulus_attack.py` | Common Modulus Attack | ✅ Working — includes control case with non-coprime exponents |
+| `bleichenbacher_toy.py` | Bleichenbacher padding oracle (toy modulus) | ✅ Working — 128-bit modulus, ~43,000 oracle queries |
+| `timing_attack_demo.py` | Timing side-channel (operation-count model) | ✅ Working — demonstrates leak without real clock measurement |
+
+Shor's Algorithm is not implemented — a real implementation requires a quantum circuit simulator. It is covered analytically in Section 4.5 of the report.
+
+---
+
+## Supporting Documents
+
+| File | Contents |
+|------|----------|
+| `README.md` | This file |
+| `WORK_LOG.md` | Weekly time distribution, what happened each week |
+| `PROJECT_GOALS.md` | Original proposal goals vs actual outcomes |
+| `C0_DEBUGGING_NOTES.md` | Every error found during implementation, including appendix corrections |
+| `ETHICS_AND_PROFESSIONAL.md` | Dual-use considerations, responsible disclosure, scope boundaries |
+
+---
+
+## How to Run
+
+Requires Python 3.8+. No external dependencies.
 
 ```bash
-pip install -r requirements.txt
-python3 wieners_attack.py
-python3 common_modulus_attack.py
-python3 bleichenbacher_toy.py      # takes a few seconds (~40k oracle queries)
-python3 timing_attack_demo.py
+python wiener_attack.py
+python common_modulus_attack.py
+python bleichenbacher_toy.py      # takes ~10-30 seconds
+python timing_attack_demo.py
 ```
 
-Each script is self-contained and prints its own results — no arguments needed.
+Each script prints its own test results. Every script has at least one case designed to fail (demonstrating the precondition is enforced) and one designed to succeed.
 
-## What's implemented
+---
 
-| Script | Attack | Reference | Details |
-|---|---|---|---|
-| `wieners_attack.py` | Wiener's Attack — recovers a small RSA private exponent `d` from the public key `(e, N)` alone, via continued fractions of `e/N`. | Wiener, *IEEE Trans. Info. Theory*, 1990 | [OUTPUT.md §1](OUTPUT.md#1-wieners-attack) |
-| `common_modulus_attack.py` | Common Modulus Attack — recovers a plaintext encrypted twice under the same modulus with two coprime exponents. | Boneh, *Notices of the AMS*, 1999 | [OUTPUT.md §2](OUTPUT.md#2-common-modulus-attack) |
-| `bleichenbacher_toy.py` | Bleichenbacher's Padding Oracle Attack — a toy-sized (~128-bit) local simulation of the adaptive chosen-ciphertext attack against PKCS#1 v1.5 padding. | Bleichenbacher, *CRYPTO '98* | [OUTPUT.md §3](OUTPUT.md#3-bleichenbachers-padding-oracle-attack-toy-simulation) |
-| `timing_attack_demo.py` | Timing Side-Channel Attack — models the operation-count gap between naive square-and-multiply and a constant-time (Montgomery-ladder) implementation. | Kocher, *CRYPTO '96* | [OUTPUT.md §4](OUTPUT.md#4-timing-side-channel-attack-simulation) |
+## Key Finding from Implementation
 
-Shor's Algorithm is not implemented, since a meaningful demonstration would require a
-quantum circuit simulator; it's discussed analytically only, in the accompanying report.
+Writing code to verify the hand calculations in the report's appendices caught two arithmetic errors:
 
-## Notable finding
+1. **Appendix A (Wiener's Attack):** d=5 does not satisfy Wiener's bound for N=667. The report states d < N^(1/4)/3 ≈ 1.7, but 5 > 1.7. The code correctly returns FAILED on these parameters.
 
-While reproducing the report's own hand-worked appendix examples in code, two numerical
-errors were found in the original appendices — see [OUTPUT.md](OUTPUT.md#debugging-note--errors-found-in-the-reports-own-appendices)
-for the full detail. In short: Appendix A's claimed `d = 5` does not actually satisfy
-Wiener's bound for `N = 667` (the code correctly fails on those exact numbers), and Appendix
-B's stated `c1 = 578` should be `c1 = 586`.
+2. **Appendix B (Common Modulus Attack):** The report states c₁ = 42⁵ mod 667 = 578, but the correct value is 586. The code uses the corrected value and recovers m=42 as expected.
 
-## Scope and disclaimers
+Both errors are left uncorrected in the report appendices deliberately — the discrepancy between the appendix numbers and the repository numbers is itself evidence that the code independently verified the analysis. See `C0_DEBUGGING_NOTES.md` for full detail.
 
-- All scripts run entirely locally against keys generated by the script itself. None of
-  this targets, or is intended to be used against, any real service.
-- `bleichenbacher_toy.py` uses a small (~128-bit) modulus purely to keep runtime short; a
-  real 2048-bit key needs hundreds of thousands to millions of oracle queries.
-- `timing_attack_demo.py` models timing via multiplication count, not real wall-clock
-  measurement — see OUTPUT.md for why.
-- Shor's Algorithm is not implemented here — see above.
+---
 
-## Author
+## Scope and Limitations
 
-Xurui Zhang (z5530809) — COMP6441 Security Engineering, Term 2 2026
+These implementations use toy parameters or simulated environments. None of them were tested against real deployed systems. The specific limitations of each are documented in `C0_DEBUGGING_NOTES.md` and in the report's Section 5 (Reflection).
+
+The most significant gap: `bleichenbacher_toy.py` uses a 128-bit simulated oracle rather than a real TLS server. Query counts (~43,000) are not directly comparable to a real attack against RSA-2048 (~millions of queries). The mechanism is correct; the scale is not representative.
